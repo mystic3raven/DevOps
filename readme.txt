@@ -1,11 +1,25 @@
-Jenkins installation - https://pkg.origin.jenkins.io/debian/
+# DevSecOps - CI/CD Pipeline
+### Tools Used 
+- Java - Programming
+- SpringBoot - Spring framework
+- Git - Version control
+- Jenkins - Continuous Integration
+- Maven -Build Tool
+- Junit - Test
+- SonarQube - Static Code Analysis
+- Docker - Containerization
+- Trivy -  Security And Misconfiguration Scanner
+- Slack - Messaging
+- Hashicorp Vault - Secrets And Encryption Management Tool
 
-Sonar	Qube + PostgresSQL - https://www.fosstechnix.com/how-to-install-sonarqube-on-ubuntu-22-04-lts/ & https://www.digitalocean.com/community/tutorials/opening-a-port-on-linux
-https://www.commandprompt.com/education/how-to-uninstall-postgresql-from-ubuntu/
-https://www.liquidweb.com/kb/how-to-uninstall-software-in-ubuntu/
+### Installation Links 
 
-Docker https://docs.docker.com/engine/install/ubuntu/#set-up-the-repository
+**Jenkins**  - https://pkg.origin.jenkins.io/debian/
 
-Trivy https://aquasecurity.github.io/trivy/v0.40/getting-started/installation/
+**Sonar	Qube + PostgresSQL** - https://www.fosstechnix.com/how-to-install-sonarqube-on-ubuntu-22-04-lts/ & https://www.digitalocean.com/community/tutorials/opening-a-port-on-linux
 
-Hashicorp https://www.cyberithub.com/how-to-install-hashicorp-vault-on-ubuntu-20-04-lts/
+**Docker** https://docs.docker.com/engine/install/ubuntu/#set-up-the-repository
+
+**Trivy** https://aquasecurity.github.io/trivy/v0.40/getting-started/installation/
+
+**Hashicorp** https://www.cyberithub.com/how-to-install-hashicorp-vault-on-ubuntu-20-04-lts/
