@@ -83,3 +83,12 @@ Pipeline flow:
 5.	Trivy will scan the docker image, if it finds any Vulnerability then the whole pipeline will become a failure, and the generated report will be sent to s3 for future review and Jenkins will notify the user that your build fails.
 6.	After trivy scan docker images will be pushed to the docker hub, if the docker fails to push docker images to the docker hub then the pipeline will become a failure and Jenkins will notify the user that your build fails.
 7.	After the docker push, Jenkins will create deployment and service in minikube and our application will be deployed into Kubernetes. if Jenkins fails to create deployment and service in Kubernetes, the whole pipeline will become a failure and Jenkins will notify the user that your build fails.
+
+## Outputs :
+1. Successful installations of PostgreSQL, SonarQube, Jenkins, Docker CE and Vault on Ubuntu system
+![Screenshot 2023-04-21 175421](https://github.com/aditi55/DevOps/assets/67974030/cde85c40-39a3-41a7-9548-acea4bf19591)
+
+![docker](https://github.com/aditi55/DevOps/assets/67974030/c95f2389-3610-4bd7-ab12-fb3f7e9f0ba9)
+
+![vault](https://github.com/aditi55/DevOps/assets/67974030/b38e640c-8f32-43e1-adfd-06dcfe51473f)
+
