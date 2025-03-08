@@ -1,0 +1,121 @@
+name: DevSecOps CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  devsecops_pipeline:
+    name: DevSecOps Pipeline
+    runs-on: ubuntu-latest
+
+    services:
+      sonarqube:
+        image: sonarqube:lts
+        ports:
+          - 9000:9000
+        env:
+          SONARQUBE_JDBC_URL: jdbc:postgresql://localhost:5432/sonar
+          SONARQUBE_JDBC_USERNAME: sonar
+          SONARQUBE_JDBC_PASSWORD: sonar
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/api/system/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Set up Maven
+        uses: s4u/setup-maven-action@v1.7.0
+        with:
+          maven-version: '3.8.6'
+
+      - name: Build and Run Tests
+        run: mvn clean install
+
+      - name: Run JUnit Tests
+        run: mvn test
+
+      - name: Archive Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: target/surefire-reports/**/*.xml
+
+      - name: Wait for SonarQube to Start
+        run: sleep 30
+
+      - name: Run SonarQube Analysis
+        uses: sonarsource/sonarqube-scan-action@v1.2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=devsecops-project-key
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+
+      - name: Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@v1.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: |
+          docker build -t adv333/salonservice:latest.${{ github.run_id }} .
+          docker tag adv333/salonservice:latest.${{ github.run_id }} adv333/salonservice:latest
+
+      - name: Push Docker Image
+        run: docker push adv333/salonservice:latest
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+
+      - name: Scan Docker Image
+        run: trivy image --severity HIGH,CRITICAL --no-progress --exit-code 1 adv333/salonservice:latest || true
+
+      - name: Generate Trivy Report
+        run: |
+          trivy image --format template --template "@/usr/local/share/trivy/templates/html.tpl" -o report.html adv333/salonservice:latest
+
+      - name: Upload Trivy Report to S3
+        uses: jakejarvis/s3-sync-action@v0.5.1
+        with:
+          args: --acl public-read --follow-symlinks
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SOURCE_DIR: "report.html"
+          DEST_DIR: "trivy-reports"
+
+      - name: Send Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: "DevSecOps Pipeline Execution Completed Successfully"
+
+
